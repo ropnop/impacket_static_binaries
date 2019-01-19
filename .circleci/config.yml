@@ -80,16 +80,19 @@ workflows:
             branches:
               only:
                 - master
+                - /release-.*/
       - build_windows:
           filters:
             branches:
               only:
                 - master
+                - /release-.*/
       - github-release:
           filters:
             branches:
               only:
                 - master
+                - /release-.*/
           context: "Github Token"
           requires:
             - build_linux
