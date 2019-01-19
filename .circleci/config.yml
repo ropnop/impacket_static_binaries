@@ -1,0 +1,96 @@
+version: 2
+jobs:
+  build_linux:
+    docker:
+      - image: rflathers/centos5_python27     
+    working_directory: ~/impacket
+    steps:
+      - checkout
+      - run:
+          name: install impacket
+          command: |
+            pip install .
+      - run:
+          name: install pyinstaller
+          command: |
+            pip install --upgrade pip
+            pip install --upgrade setuptools
+            pip install pyinstaller
+      - run:
+          name: Create standalone executables
+          command: |
+            for i in examples/*.py; do pyinstaller -F $i; done
+      - run:
+          name: Rename binaries
+          command: |
+            ARCH=$(uname -m)
+            find dist/ -type f -exec mv {} {}_linux_$ARCH \;
+      - run:
+          name: Write version.txt
+          command: |
+            awk -F '"' '/version =/{print $2} ' setup.py > ./dist/version.txt
+      - store_artifacts:
+          path: ./dist
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - ./*
+  build_windows:
+    docker:
+      - image: cdrx/pyinstaller-windows:python2
+    working_directory: ~/impacket
+    steps:
+      - checkout
+      - run:
+          name: install impacket
+          command: |
+            pip install .
+      - run:
+          name: create standalone executables
+          command: |
+            for i in examples/*.py; do pyinstaller -F $i; done
+      - run:
+          name: rename binaries
+          command: |
+            for f in dist/*.exe; do mv "$f" "${f%.*}_windows.${f##*.}"; done
+      - store_artifacts:
+          path: ./dist
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - ./*
+  github-release:
+    docker:
+      - image: cibuilds/github:0.10
+    steps:
+      - attach_workspace:
+          at: ./artifacts
+      - run:
+          name: "Publish Binaries on Github"
+          command: |
+            VERSION=$(cat ./artifacts/version.txt)
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION}-binaries ./artifacts/
+
+workflows:
+  version: 2
+  main:
+    jobs:
+      - build_linux:
+          filters:
+            branches:
+              only:
+                - master
+      - build_windows:
+          filters:
+            branches:
+              only:
+                - master
+      - github-release:
+          filters:
+            branches:
+              only:
+                - master
+          context: "Github Token"
+          requires:
+            - build_linux
+            - build_windows
