@@ -1,5 +1,6 @@
 # Impacket Static Binaries
-[![CircleCI](https://circleci.com/gh/ropnop/impacket_static_binaries.svg?style=svg)](https://circleci.com/gh/ropnop/impacket_static_binaries)
+[![CircleCI](https://circleci.com/gh/ropnop/impacket_static_binaries.svg?style=svg)](https://circleci.com/gh/ropnop/impacket_static_binaries)   [Get Latest Binaries Here](https://github.com/ropnop/impacket_static_binaries/releases/latest)
+
 ## Description
 This repository is a fork of the amazing Impacket project available here: https://github.com/SecureAuthCorp/impacket
 
