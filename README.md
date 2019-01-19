@@ -9,6 +9,7 @@ This fork has a CircleCI pipeline to create stand-alone executables for both Win
 It's using [PyInstaller](http://www.pyinstaller.org/) to create both the Windows and Linux executables. The Windows binaries are built with Wine using cdrx's docker image: https://github.com/cdrx/docker-pyinstaller
 
 For maximum compatibility, the Linux binaries are built with the oldest version of glibc I could find - CentOS 5 running Glibc 2.5: https://github.com/ropnop/centos5_python27_docker. 
+
 These binaries should work with any version of glibc newer than 2.5. 
 
 ## Usage
