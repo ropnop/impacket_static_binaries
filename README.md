@@ -44,3 +44,5 @@ I also haven't fully tested every example, so no guarantees. If you discover som
 
 Enjoy!
 -ropnop
+
+PS shout out to maaaaz for the inspiration! https://github.com/maaaaz/impacket-examples-windows
