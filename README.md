@@ -22,7 +22,15 @@ $ python
 bash: python: command not found
 $ curl -s -o wmiexec -L https://github.com/ropnop/impacket_static_binaries/releases/download/0.9.19-dev-binaries/wmiexec_linux_x86_64
 $ chmod +x wmiexec
-$ ./wmiexec
+$ ./wmiexec LAB/agreen@192.168.98.161
+Impacket v0.9.19-dev - Copyright 2018 SecureAuth Corporation
+
+Password:
+[*] SMBv2.1 dialect used
+[!] Launching semi-interactive shell - Careful what you execute
+[!] Press help for extra shell commands
+C:\>whoami
+lab\agreen
 ```
 
 ## Known issues
