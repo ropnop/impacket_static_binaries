@@ -17,6 +17,10 @@ jobs:
             pip install --upgrade setuptools
             pip install pyinstaller
       - run:
+          name: gross hacky hack
+          command: |
+            sed -r -i 's/sys\.std(in|out)\.encoding/"UTF-8"/g' examples/*exec.py      
+      - run:
           name: Create standalone executables
           command: |
             for i in examples/*.py; do pyinstaller -F $i; done
