@@ -28,6 +28,8 @@ $ ./wmiexec
 ## Known issues
 `ntlmrelayx` and `smbrelayx` aren't working properly yet. They do some custom loading that PyInstaller doesn't like. Still working on that...
 
+Currently, `wmiexec.py`, `psexec.py` and `dcomexec.py` are hardcoded to use UTF-8 in the built binaries. There's some issues with Pyinstaller and calling `sys.stdout.encoding`. If you need something other than UTF-8, you'll have to rebuild on your own for now. Still working on this....
+
 I also haven't fully tested every example, so no guarantees. If you discover something that's not working as intended, please file an issue.
 
 Currently glibc >= 2.5 is required. Eventually I'd like to look at building against musl (so they could work in Alpine linux for example)
