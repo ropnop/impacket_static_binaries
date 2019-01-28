@@ -15,7 +15,7 @@ jobs:
           command: |
             pip install pip==18.1
             pip install setuptools==40.6.3
-            pip install pyinstaller
+            pip install pyinstaller==3.4
       - run:
           name: gross hacky hack
           command: |
