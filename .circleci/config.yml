@@ -13,8 +13,8 @@ jobs:
       - run:
           name: install pyinstaller
           command: |
-            pip install --upgrade pip
-            pip install --upgrade setuptools
+            pip install pip==18.1
+            pip install setuptools==40.6.3
             pip install pyinstaller
       - run:
           name: gross hacky hack
