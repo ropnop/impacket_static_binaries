@@ -8,9 +8,9 @@ This fork has a CircleCI pipeline to create stand-alone executables for both Win
 
 It's using [PyInstaller](http://www.pyinstaller.org/) to create both the Windows and Linux executables. The Windows binaries are built with Wine using cdrx's docker image: https://github.com/cdrx/docker-pyinstaller
 
-For maximum compatibility, the Linux binaries are built with the oldest version of glibc I could find - CentOS 5 running Glibc 2.5: https://github.com/ropnop/centos5_python27_docker. 
+For maximum compatibility, the Linux binaries are built with the oldest version of glibc I could find - CentOS 5 running Glibc 2.5: https://github.com/ropnop/centos5_python27_docker. These binaries should work with any version of glibc newer than 2.5. 
 
-These binaries should work with any version of glibc newer than 2.5. 
+I've also compiled all the Linux binaries against [musl](https://www.musl-libc.org/) instead of glibc in case you land in a lightweight container (e.g. Alpine) that doesn't have libc. These are all bundled up in a file on the releases page called `impacket_musl_binaries.tar.gz`.
 
 ## Usage
 If you are operating in a restricted environment that either doesn't have Python (or you don't want to disturb any existing python packages), you should be able to download and execute the Impacket examples from the releases page.
