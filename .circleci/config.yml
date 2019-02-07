@@ -80,7 +80,7 @@ jobs:
       - run:
           name: create standalone executables
           command: |
-            for i in example/*.py; do pyinstaller -F $i; done
+            for i in examples/*.py; do pyinstaller -F $i; done
       - run:
           name: Rename binaries
           command: |
