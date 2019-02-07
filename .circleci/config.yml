@@ -95,7 +95,7 @@ jobs:
       - persist_to_workspace:
           root: dist
           paths:
-            - ./impacket_alpine.tar.gz
+            - ./impacket_musl_binaries.tar.gz
   github-release:
     docker:
       - image: cibuilds/github:0.10
