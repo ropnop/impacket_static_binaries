@@ -140,3 +140,4 @@ workflows:
           requires:
             - build_linux
             - build_windows
+            - build_alpine
