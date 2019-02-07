@@ -63,6 +63,39 @@ jobs:
           root: dist
           paths:
             - ./*
+  build_alpine:
+    docker: 
+      - image: rflathers/alpine34_pyinstaller:latest
+    working_directory: ~/impacket
+    steps:
+      - checkout
+      - run:
+          name: install impacket
+          command: |
+            pip install .
+      - run:
+          name: gross hacky hack
+          command: |
+            sed -r -i 's/sys\.std(in|out)\.encoding/"UTF-8"/g' examples/*exec.py 
+      - run:
+          name: create standalone executables
+          command: |
+            for i in example/*.py; do pyinstaller -F $i; done
+      - run:
+          name: Rename binaries
+          command: |
+            ARCH=$(uname -m)
+            find dist/ -type f -exec mv {} {}_musl_$ARCH \;
+      - run:
+          name: tarball binaries
+          command: |
+            tar czf impacket_musl_binaries.tar.gz -C dist/ .
+      - store_artifacts:
+          path: ./dist
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - ./impacket_alpine.tar.gz
   github-release:
     docker:
       - image: cibuilds/github:0.10
@@ -86,6 +119,12 @@ workflows:
                 - master
                 - /release-.*/
       - build_windows:
+          filters:
+            branches:
+              only:
+                - master
+                - /release-.*/
+      - build_alpine:
           filters:
             branches:
               only:
