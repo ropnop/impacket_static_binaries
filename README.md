@@ -33,6 +33,22 @@ C:\>whoami
 lab\agreen
 ```
 
+### Building
+If you'd like to build the binaries locally, I've included a Makefile and build scripts that essentially do the exact same thing CircleCI does. You need to run the build scripts inside the correct Dockerimage (the make targets take care of that for you).
+
+```
+$ make help
+help:	 Show this help
+all: linux musl windows  (Build everything)
+linux:  Build linux_x64 Binaries in Docker
+musl:  Build linux_x64 binaries against musl in Alpine Linux Docker
+windows:  Build Windows_x64 binaries
+clean: cleanspec  Remove all build artifacts
+cleanspec:  Remove spec files
+```
+
+To build all the Linux binaries for example: `make linux`. This will output all the binaries in the `./dist` directory for you.
+
 ## Known issues
 `ntlmrelayx` and `smbrelayx` aren't working properly yet. They do some custom loading that PyInstaller doesn't like. Still working on that...
 
