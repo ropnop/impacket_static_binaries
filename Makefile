@@ -30,6 +30,6 @@ clean: cleanspec ## Remove all build artifacts
 	rm -rf dist/* build/*
 
 cleanspec: ## Remove spec files
-	rm *.spec
+	rm -f *.spec
 	rm -rf spec/
 
