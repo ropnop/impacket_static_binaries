@@ -30,6 +30,11 @@ jobs:
             ARCH=$(uname -m)
             find dist/ -type f -exec mv {} {}_linux_$ARCH \;
       - run:
+          name: Tarball binaries
+          command: |
+            tar czf impacket_linux_binaries.tar.gz -C dist/ .
+            mv impacket_linux_binaries.tar.gz dist/
+      - run:
           name: Write version.txt
           command: |
             awk -F '"' '/version =/{print $2} ' setup.py > ./dist/version.txt
@@ -57,6 +62,11 @@ jobs:
           name: rename binaries
           command: |
             for f in dist/*.exe; do mv "$f" "${f%.*}_windows.${f##*.}"; done
+      - run:
+          name: zip binaries
+          command: |
+            zip -r impacket_windows_binaries.zip dist/
+            mv impacket_windows_binaries.zip dist/
       - store_artifacts:
           path: ./dist
       - persist_to_workspace:
