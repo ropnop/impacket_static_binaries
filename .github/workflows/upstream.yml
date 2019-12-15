@@ -3,7 +3,7 @@ name: Sync with Upstream
 on:
   schedule:
     #- cron: "0 0 * * *" #every 24 hours
-    - cron: "0/2 * * *"
+    - cron: "*/2 * * *"
 
 jobs:
  sync-upstream-master:
