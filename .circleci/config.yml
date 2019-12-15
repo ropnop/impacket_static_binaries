@@ -126,25 +126,25 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                # - master
                 - /release-.*/
       - build_windows:
           filters:
             branches:
               only:
-                - master
+                # - master
                 - /release-.*/
       - build_alpine:
           filters:
             branches:
               only:
-                - master
+                # - master
                 - /release-.*/
       - github-release:
           filters:
             branches:
               only:
-                - master
+                # - master
                 - /release-.*/
           context: "Github Token"
           requires:
