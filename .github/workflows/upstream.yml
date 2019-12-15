@@ -32,6 +32,9 @@ jobs:
          fi
      
      - name: Check for new release
+       env:
+          GITHUB_USER: ${{ secrets.GITHUB_USER }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
        working-directory: ./impacket_static_binaries
        run: |
          latestUpstreamRelease=($(hub release -L 1|cut -d_ -f2-))
