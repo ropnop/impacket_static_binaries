@@ -650,7 +650,7 @@ class SMB3:
                 self._Session['SigningKey']  = crypto.KDF_CounterMode(self._Session['SessionKey'], b"SMB2AESCMAC\x00", b"SmbSign\x00", 128)
 
             # Do not encrypt anonymous connections
-            if user == '':
+            if user == '' or self.isGuestSession():
                 self._Connection['SupportsEncryption'] = False
 
             # Calculate the key derivations for dialect 3.0
@@ -798,7 +798,7 @@ class SMB3:
                     self._Session['SessionID']    = packet['SessionID']
 
                     # Do not encrypt anonymous connections
-                    if user == '':
+                    if user == '' or self.isGuestSession():
                         self._Connection['SupportsEncryption'] = False
 
                     # Calculate the key derivations for dialect 3.0
@@ -1310,7 +1310,7 @@ class SMB3:
 
         queryInfo = SMB2QueryInfo()
         queryInfo['FileID']                = fileId
-        queryInfo['InfoType']              = SMB2_0_INFO_FILE 
+        queryInfo['InfoType']              = infoType 
         queryInfo['FileInfoClass']         = fileInfoClass 
         queryInfo['OutputBufferLength']    = 65535
         queryInfo['AdditionalInformation'] = additionalInformation
@@ -1341,7 +1341,7 @@ class SMB3:
         packet['TreeID']  = treeId
 
         setInfo = SMB2SetInfo()
-        setInfo['InfoType']              = SMB2_0_INFO_FILE 
+        setInfo['InfoType']              = infoType 
         setInfo['FileInfoClass']         = fileInfoClass 
         setInfo['BufferLength']          = len(inputBlob)
         setInfo['AdditionalInformation'] = additionalInformation
@@ -1697,3 +1697,8 @@ class SMB3:
 
         fileId = self.create(tid,fileName,desired_access, open_mode, FILE_NON_DIRECTORY_FILE, open_mode, 0)
         return fileId, 0, 0, 0, 0, 0, 0, 0, 0
+
+    def set_session_key(self, signingKey):
+        self._Session['SessionKey'] = signingKey
+        self._Session['SigningActivated'] = True
+        self._Session['SigningRequired'] = True
