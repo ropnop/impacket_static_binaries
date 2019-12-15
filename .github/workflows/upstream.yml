@@ -3,6 +3,7 @@ name: Sync with Upstream
 on:
   schedule:
     - cron: "0 0 * * *" #every 24 hours
+  repository_dispatch: foobar   
 
 jobs:
  merge-upstream-master:
@@ -28,6 +29,18 @@ jobs:
             git push origin master
          else
             echo "Nothing changed!"
+         fi
+     
+     - name: Check for new release
+       working-directory: ./impacket_static_binaries
+       run: |
+         latestUpstreamRelease=($(hub release -L 1|cut -d_ -f2-))
+         myReleases=($(git branch --list --all |grep "origin/release-"|cut -d- -f2-))
+         if [[ ! " ${myReleases[@]} " =~ " ${latestUpstreamRelease} " ]]; then
+            echo "New Impacket release!"
+            echo "TODO"
+         else
+            echo "Releases are synced"
          fi
          
          
