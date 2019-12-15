@@ -38,7 +38,7 @@ jobs:
          git merge --no-ff --no-commit upstream/master
          git reset HEAD README.md .github #never change these
          git checkout -- README.md .github
-         if ! (git diff --cached --exit-code # test if something has changed); then
+         if ! (git diff --cached --exit-code > /dev/null); then # test if something changed
             git commit -m "merged upstream/master"
             git push origin master
          else
