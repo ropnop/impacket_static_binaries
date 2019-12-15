@@ -1,6 +1,6 @@
 name: Build and Release
 
-on: [push]
+#on: [push]
 
 jobs:
   build_linux:
