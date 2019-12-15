@@ -1,6 +1,7 @@
 name: Build and Release
 
-#on: [push]
+on:
+  repository_dispatch:
 
 jobs:
   build_linux:
