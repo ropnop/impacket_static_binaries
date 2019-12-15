@@ -23,9 +23,15 @@ jobs:
    runs-on: [ubuntu-latest]
    steps:
 #      - uses: actions/checkout@master
-     - name: Merge Upstream Master
+     - name: Test hub
+       run: which hub
+     - name: Clone repo
        run: |
          git clone https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+
+     - name: Merge Upstream Master
+       working-directory: ./impacket_static_binaries
+       run: |
          git remote add upstream https://github.com/SecureAuthCorp/impacket.git
          git fetch upstream
          git merge --no-ff --no-commit upstream/master
