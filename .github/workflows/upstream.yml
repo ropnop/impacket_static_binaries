@@ -2,10 +2,11 @@ name: Sync with Upstream
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    #- cron: "0 0 * * *" #every 24 hours
+    - cron: "0/2 * * *"
 
 jobs:
- repo-sync:
+ sync-upstream-master:
    runs-on: [ubuntu-latest]
    steps:
    - uses: actions/checkout@master  
@@ -16,3 +17,21 @@ jobs:
        source_branch: "master"
        destination_branch: "upstream_master"
        github_token: ${{ secrets.GITHUB_TOKEN }}
+ 
+ merge-upstream-master:
+   runs-on: [ubuntu-latest]
+   steps:
+     - uses: actions/checkout@master
+     - name: Merge Upstream Master
+       run: |
+         git remote set-url origin "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY"
+         git remote add upstream https://github.com/SecureAuthCorp/impacket.git
+         git fetch upstream
+         git merge --no-ff -no-commit upstream/master
+         git reset HEAD README.md .github #never change these
+         git checkout -- README.md .github
+         git commit -m "merged upstream/master"
+         git push origin master
+         
+         
+         
