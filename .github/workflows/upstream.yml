@@ -24,7 +24,7 @@ jobs:
      - uses: actions/checkout@master
      - name: Merge Upstream Master
        run: |
-         git remote set-url origin "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY"
+         git remote set-url origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
          git remote add upstream https://github.com/SecureAuthCorp/impacket.git
          git fetch upstream
          git merge --no-ff --no-commit upstream/master
