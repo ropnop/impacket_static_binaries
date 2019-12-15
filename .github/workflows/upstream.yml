@@ -24,8 +24,6 @@ jobs:
    steps:
 #      - uses: actions/checkout@master
      - uses: geertvdc/setup-hub@master
-     - name: Test hub
-       run: which hub
      - name: Clone repo
        run: |
          git clone https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
@@ -40,8 +38,11 @@ jobs:
          git merge --no-ff --no-commit upstream/master
          git reset HEAD README.md .github #never change these
          git checkout -- README.md .github
-         git commit -m "merged upstream/master"
-         git push origin master
-         
+         if ! (git diff --cached --exit-code # test if something has changed); then
+            git commit -m "merged upstream/master"
+            git push origin master
+         else
+            echo "Nothing changed!"
+         fi
          
          
