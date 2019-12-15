@@ -7,17 +7,17 @@ on:
     repository_dispatch:
 
 jobs:
- sync-upstream-master:
-   runs-on: [ubuntu-latest]
-   steps:
-   - uses: actions/checkout@master  
-   - name: repo-sync
-     uses: repo-sync/github-sync@v2
-     with:
-       source_repo: "https://github.com/SecureAuthCorp/impacket.git"
-       source_branch: "master"
-       destination_branch: "upstream_master"
-       github_token: ${{ secrets.GITHUB_TOKEN }}
+#  sync-upstream-master:
+#    runs-on: [ubuntu-latest]
+#    steps:
+#    - uses: actions/checkout@master  
+#    - name: repo-sync
+#      uses: repo-sync/github-sync@v2
+#      with:
+#        source_repo: "https://github.com/SecureAuthCorp/impacket.git"
+#        source_branch: "master"
+#        destination_branch: "upstream_master"
+#        github_token: ${{ secrets.GITHUB_TOKEN }}
  
  merge-upstream-master:
    runs-on: [ubuntu-latest]
