@@ -3,7 +3,7 @@ name: Sync with Upstream
 on:
   schedule:
     - cron: "0 0 * * *" #every 24 hours
-  repository_dispatch: foobar   
+  repository_dispatch:   
 
 jobs:
  merge-upstream-master:
