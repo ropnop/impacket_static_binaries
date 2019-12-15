@@ -33,6 +33,8 @@ jobs:
      - name: Merge Upstream Master
        working-directory: ./impacket_static_binaries
        run: |
+         git config --local user.name githubactions
+         git config --local user.email rflathers@gmail.com
          git remote add upstream https://github.com/SecureAuthCorp/impacket.git
          git fetch upstream
          git merge --no-ff --no-commit upstream/master
