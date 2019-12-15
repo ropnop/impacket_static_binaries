@@ -45,8 +45,8 @@ from impacket.dcerpc.v5.drsuapi import MSRPC_UUID_DRSUAPI, hDRSDomainControllerI
     DRS_EXTENSIONS_INT, DRS_EXT_GETCHGREQ_V6, DRS_EXT_GETCHGREPLY_V6, DRS_EXT_GETCHGREQ_V8, DRS_EXT_STRONG_ENCRYPTION, \
     NULLGUID
 from impacket.dcerpc.v5.dtypes import RPC_SID, MAXIMUM_ALLOWED
-from impacket.dcerpc.v5.lsad import hLsarQueryInformationPolicy2, POLICY_INFORMATION_CLASS
-from impacket.dcerpc.v5.lsat import MSRPC_UUID_LSAT, hLsarOpenPolicy2, POLICY_LOOKUP_NAMES
+from impacket.dcerpc.v5.lsad import hLsarQueryInformationPolicy2, POLICY_INFORMATION_CLASS, hLsarOpenPolicy2
+from impacket.dcerpc.v5.lsat import MSRPC_UUID_LSAT, POLICY_LOOKUP_NAMES
 from impacket.dcerpc.v5.nrpc import MSRPC_UUID_NRPC, hDsrGetDcNameEx
 from impacket.dcerpc.v5.rpcrt import TypeSerialization1, RPC_C_AUTHN_LEVEL_PKT_INTEGRITY, RPC_C_AUTHN_LEVEL_PKT_PRIVACY
 from impacket.krb5.pac import PKERB_VALIDATION_INFO, KERB_VALIDATION_INFO, KERB_SID_AND_ATTRIBUTES, PAC_CLIENT_INFO, \
@@ -936,7 +936,7 @@ class MS14_068:
                         # Windows XP). So, if that's the case we'll force using RC4 by converting
                         # the password to lm/nt hashes and hope for the best. If that's already
                         # done, byebye.
-                        if self.__lmhash is '' and self.__nthash is '':
+                        if self.__lmhash == '' and self.__nthash == '':
                             from impacket.ntlm import compute_lmhash, compute_nthash
                             self.__lmhash = compute_lmhash(self.__password)
                             self.__nthash = compute_nthash(self.__password)
@@ -991,7 +991,7 @@ class MS14_068:
                         # Windows XP). So, if that's the case we'll force using RC4 by converting
                         # the password to lm/nt hashes and hope for the best. If that's already
                         # done, byebye.
-                        if self.__lmhash is '' and self.__nthash is '':
+                        if self.__lmhash == '' and self.__nthash == '':
                             from impacket.ntlm import compute_lmhash, compute_nthash
                             self.__lmhash = compute_lmhash(self.__password)
                             self.__nthash = compute_nthash(self.__password)
@@ -1116,7 +1116,7 @@ if __name__ == '__main__':
         password = password + '@' + address.rpartition('@')[0]
         address = address.rpartition('@')[2]
 
-    if domain is '':
+    if domain == '':
         logging.critical('Domain should be specified!')
         sys.exit(1)
 

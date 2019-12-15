@@ -76,7 +76,7 @@ class GetADUsers:
             s.login('', '')
         except Exception:
             if s.getServerName() == '':
-                raise 'Error while anonymous logging into %s'
+                raise Exception('Error while anonymous logging into %s' % self.__domain)
         else:
             s.logoff()
         return s.getServerName()
@@ -226,7 +226,7 @@ if __name__ == '__main__':
         password = password + '@' + address.rpartition('@')[0]
         address = address.rpartition('@')[2]
 
-    if domain is '':
+    if domain == '':
         logging.critical('Domain should be specified!')
         sys.exit(1)
 

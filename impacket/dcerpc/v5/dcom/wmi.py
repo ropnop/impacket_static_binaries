@@ -812,9 +812,7 @@ class INSTANCE_TYPE(Structure):
             # if itemValue == 0, default value remains
             if itemValue != 0:
                 value = ENCODED_VALUE.getValue( properties[key]['type'], itemValue, heap)
-            else:
-                value = 0
-            properties[key]['value'] = value
+                properties[key]['value'] = value
             valueTable = valueTable[dataSize:] 
         return properties
 
@@ -2411,7 +2409,7 @@ class IWbemClassObject(IRemUnknown):
                 if itemValue is None:
                     ndTable |= 3 << (2*i)
             else:
-                if itemValue is '':
+                if itemValue == '':
                     ndTable |= 1 << (2*i)
                     valueTable += pack('<L', 0)
                 else:

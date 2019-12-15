@@ -153,10 +153,12 @@ def start_servers(options, threads):
         c.setWpadOptions(options.wpad_host, options.wpad_auth_num)
         c.setSMB2Support(options.smb2support)
         c.setInterfaceIp(options.interface_ip)
-
+        c.setExploitOptions(options.remove_mic, options.remove_target)
+        c.setWebDAVOptions(options.serve_image)
 
         if server is HTTPRelayServer:
             c.setListeningPort(options.http_port)
+            c.setDomainAccount(options.machine_account, options.machine_hashes, options.domain)
         elif server is SMBRelayServer:
             c.setListeningPort(options.smb_port)
 
@@ -230,7 +232,7 @@ if __name__ == '__main__':
     parser.add_argument('-codec', action='store', help='Sets encoding used (codec) from the target\'s output (default '
                                                        '"%s"). If errors are detected, run chcp.com at the target, '
                                                        'map the result with '
-                                                       'https://docs.python.org/2.4/lib/standard-encodings.html and then execute ntlmrelayx.py '
+                                                       'https://docs.python.org/3/library/codecs.html#standard-encodings and then execute ntlmrelayx.py '
                                                        'again with -codec and the corresponding codec ' % sys.getdefaultencoding())
     parser.add_argument('-smb2support', action="store_true", default=False, help='SMB2 Support (experimental!)')
     parser.add_argument('-socks', action='store_true', default=False,
@@ -240,6 +242,8 @@ if __name__ == '__main__':
     parser.add_argument('-wa','--wpad-auth-num', action='store',help='Prompt for authentication N times for clients without MS16-077 installed '
                                                                    'before serving a WPAD file.')
     parser.add_argument('-6','--ipv6', action='store_true',help='Listen on both IPv6 and IPv4')
+    parser.add_argument('--remove-mic', action='store_true',help='Remove MIC (exploit CVE-2019-1040)')
+    parser.add_argument('--serve-image', action='store',help='local path of the image that will we returned to clients')
 
     #SMB arguments
     smboptions = parser.add_argument_group("SMB client options")
@@ -256,6 +260,17 @@ if __name__ == '__main__':
     mssqloptions.add_argument('-q','--query', action='append', required=False, metavar = 'QUERY', help='MSSQL query to execute'
                         '(can specify multiple)')
 
+    #HTTPS options
+    httpoptions = parser.add_argument_group("HTTP options")
+    httpoptions.add_argument('-machine-account', action='store', required=False,
+                            help='Domain machine account to use when interacting with the domain to grab a session key for '
+                                 'signing, format is domain/machine_name')
+    httpoptions.add_argument('-machine-hashes', action="store", metavar="LMHASH:NTHASH",
+                            help='Domain machine hashes, format is LMHASH:NTHASH')
+    httpoptions.add_argument('-domain', action="store", help='Domain FQDN or IP to connect using NETLOGON')
+    httpoptions.add_argument('-remove-target', action='store_true', default=False,
+                            help='Try to remove the target in the challenge message (in case CVE-2019-1019 patch is not installed)')
+
     #LDAP options
     ldapoptions = parser.add_argument_group("LDAP client options")
     ldapoptions.add_argument('--no-dump', action='store_false', required=False, help='Do not attempt to dump LDAP information')
@@ -263,7 +278,7 @@ if __name__ == '__main__':
     ldapoptions.add_argument('--no-acl', action='store_false', required=False, help='Disable ACL attacks')
     ldapoptions.add_argument('--no-validate-privs', action='store_false', required=False, help='Do not attempt to enumerate privileges, assume permissions are granted to escalate a user via ACL attacks')
     ldapoptions.add_argument('--escalate-user', action='store', required=False, help='Escalate privileges of this user instead of creating a new one')
-    ldapoptions.add_argument('--add-computer', action='store_true', required=False, help='Attempt to add a new computer account')
+    ldapoptions.add_argument('--add-computer', action='store', metavar='COMPUTERNAME', required=False, const='Rand', nargs='?', help='Attempt to add a new computer account')
     ldapoptions.add_argument('--delegate-access', action='store_true', required=False, help='Delegate access on relayed computer account to the specified account')
 
     #IMAP options
