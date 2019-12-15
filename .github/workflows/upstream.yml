@@ -25,6 +25,7 @@ jobs:
      - uses: actions/checkout@master
      - name: Merge Upstream Master
        run: |
+         git fetch --all
          git remote add upstream https://github.com/SecureAuthCorp/impacket.git
          git fetch upstream
          git merge --no-ff --no-commit upstream/master
