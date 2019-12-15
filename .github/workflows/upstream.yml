@@ -42,11 +42,10 @@ jobs:
          myReleases=($(git branch --list --all |grep "origin/release-"|cut -d- -f2-))
          echo $latestUpstreamRelease
          echo $myReleases
-         if [[ ! " ${myReleases[@]} " =~ " ${latestUpstreamRelease} " ]]; then
-            echo "New Impacket release!"
-            echo "TODO"
-         else
-            echo "Releases are synced"
+         if [[ " ${myReleases[@]} " =~ " ${latestUpstreamRelease} " ]]; then
+            echo "Releases are up to date"
+            exit 0
          fi
+         
          
          
