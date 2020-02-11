@@ -89,6 +89,11 @@ class MiniShell(cmd.Cmd):
             print(url.geturl())
         return
 
+    def do_finished_attacks(self, line):
+        for url in self.relayConfig.target.finishedAttacks:
+            print (url.geturl())
+        return
+
     def do_socks(self, line):
         headers = ["Protocol", "Target", "Username", "AdminStatus", "Port"]
         url = "http://localhost:9090/ntlmrelayx/api/v1.0/relays"
@@ -145,7 +150,7 @@ def start_servers(options, threads):
         c.setAttacks(PROTOCOL_ATTACKS)
         c.setLootdir(options.lootdir)
         c.setOutputFile(options.output_file)
-        c.setLDAPOptions(options.no_dump, options.no_da, options.no_acl, options.no_validate_privs, options.escalate_user, options.add_computer, options.delegate_access, options.sid)
+        c.setLDAPOptions(options.no_dump, options.no_da, options.no_acl, options.no_validate_privs, options.escalate_user, options.add_computer, options.delegate_access, options.dump_laps, options.sid)
         c.setMSSQLOptions(options.query)
         c.setInteractive(options.interactive)
         c.setIMAPOptions(options.keyword, options.mailbox, options.all, options.imap_max)
@@ -168,7 +173,6 @@ def start_servers(options, threads):
             c.setRedirectHost(options.r)
 
         #Use target randomization if configured and the server is not SMB
-        #SMB server at the moment does not properly store active targets so selecting them randomly will cause issues
         if server is not SMBRelayServer and options.random:
             c.setRandomTargets(True)
 
@@ -222,7 +226,7 @@ if __name__ == '__main__':
     parser.add_argument('--smb-port', type=int, help='Port to listen on smb server', default=445)
     parser.add_argument('--http-port', type=int, help='Port to listen on http server', default=80)
 
-    parser.add_argument('-ra','--random', action='store_true', help='Randomize target selection (HTTP server only)')
+    parser.add_argument('-ra','--random', action='store_true', help='Randomize target selection')
     parser.add_argument('-r', action='store', metavar = 'SMBSERVER', help='Redirect HTTP requests to a file:// path on SMBSERVER')
     parser.add_argument('-l','--lootdir', action='store', type=str, required=False, metavar = 'LOOTDIR',default='.', help='Loot '
                     'directory in which gathered loot such as SAM dumps will be stored (default: current directory).')
@@ -280,6 +284,7 @@ if __name__ == '__main__':
     ldapoptions.add_argument('--add-computer', action='store', metavar='COMPUTERNAME', required=False, const='Rand', nargs='?', help='Attempt to add a new computer account')
     ldapoptions.add_argument('--delegate-access', action='store_true', required=False, help='Delegate access on relayed computer account to the specified account')
     ldapoptions.add_argument('--sid', action='store_true', required=False, help='Use a SID to delegate access rather than an account name')
+    ldapoptions.add_argument('--dump-laps', action='store_true', required=False, help='Attempt to dump any LAPS passwords readable by the user')
 
     #IMAP options
     imapoptions = parser.add_argument_group("IMAP client options")
@@ -322,12 +327,12 @@ if __name__ == '__main__':
     if options.target is not None:
         logging.info("Running in relay mode to single host")
         mode = 'RELAY'
-        targetSystem = TargetsProcessor(singleTarget=options.target, protocolClients=PROTOCOL_CLIENTS)
+        targetSystem = TargetsProcessor(singleTarget=options.target, protocolClients=PROTOCOL_CLIENTS, randomize=options.random)
     else:
         if options.tf is not None:
             #Targetfile specified
             logging.info("Running in relay mode to hosts in targetfile")
-            targetSystem = TargetsProcessor(targetListFile=options.tf, protocolClients=PROTOCOL_CLIENTS)
+            targetSystem = TargetsProcessor(targetListFile=options.tf, protocolClients=PROTOCOL_CLIENTS, randomize=options.random)
             mode = 'RELAY'
         else:
             logging.info("Running in reflection mode")
