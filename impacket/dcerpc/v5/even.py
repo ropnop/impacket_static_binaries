@@ -207,6 +207,19 @@ class ElfrNumberOfRecordsResponse(NDRCALL):
         ('ErrorCode', NTSTATUS),
     )
 
+# 3.1.4.19 ElfrOldestRecord (Opnum 5)
+class ElfrOldestRecord(NDRCALL):
+    opnum = 5
+    structure = (
+        ('LogHandle', IELF_HANDLE),
+    )
+
+class ElfrOldestRecordResponse(NDRCALL):
+    structure = (
+        ('OldestRecordNumber', ULONG),
+        ('ErrorCode', NTSTATUS),
+    )
+
 # 3.1.4.3 ElfrOpenELW (Opnum 7)
 class ElfrOpenELW(NDRCALL):
     opnum = 7
@@ -310,6 +323,7 @@ OPNUMS = {
     1   : (ElfrBackupELFW, ElfrBackupELFWResponse),
     2   : (ElfrCloseEL, ElfrCloseELResponse),
     4   : (ElfrNumberOfRecords, ElfrNumberOfRecordsResponse),
+    5   : (ElfrOldestRecord, ElfrOldestRecordResponse),
     7   : (ElfrOpenELW, ElfrOpenELWResponse),
     8   : (ElfrRegisterEventSourceW, ElfrRegisterEventSourceWResponse),
     9   : (ElfrOpenBELW, ElfrOpenBELWResponse),
@@ -339,7 +353,6 @@ def hElfrOpenELW(dce, moduleName = NULL, regModuleName = NULL):
 
 def hElfrCloseEL(dce, logHandle):
     request = ElfrCloseEL()
-
     request['LogHandle'] = logHandle
     resp = dce.request(request)
     return resp
@@ -376,7 +389,12 @@ def hElfrBackupELFW(dce, logHandle = '', backupFileName = NULL):
 
 def hElfrNumberOfRecords(dce, logHandle):
     request = ElfrNumberOfRecords()
+    request['LogHandle'] = logHandle
+    resp = dce.request(request)
+    return resp
 
+def hElfrOldestRecordNumber(dce, logHandle):
+    request = ElfrOldestRecord()
     request['LogHandle'] = logHandle
     resp = dce.request(request)
     return resp
