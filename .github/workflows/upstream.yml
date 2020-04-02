@@ -21,7 +21,7 @@ jobs:
          git config --local user.email rflathers@gmail.com
          git remote add upstream https://github.com/SecureAuthCorp/impacket.git
          git fetch upstream
-         git merge --no-ff --no-commit upstream/master
+         git merge --no-ff --no-commit upstream/master || echo "resolving conflicts"
          git reset HEAD README.md .github #never change these
          git checkout -- README.md .github
          if ! (git diff --cached --exit-code > /dev/null); then # test if something changed
