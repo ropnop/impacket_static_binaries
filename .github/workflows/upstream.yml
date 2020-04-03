@@ -42,6 +42,10 @@ jobs:
          if [[ " ${myReleases[@]} " =~ " ${latestUpstreamRelease} " ]]; then
             echo "Releases are up to date"
             exit 0
+         else
+            git checkout impacket_$latestUpstreamRelease
+            git checkout -b release-$latestUpstreamRelease
+            git push --set-upstream origin release-$latestUpstreamRelease
          fi
          
          
