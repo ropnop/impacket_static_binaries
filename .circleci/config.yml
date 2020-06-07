@@ -37,7 +37,7 @@ jobs:
       - run:
           name: Write version.txt
           command: |
-            awk -F '"' '/version =/{print $2} ' setup.py > ./dist/version.txt
+            python setup.py --version | sed 's/dev.*/dev/' > ./dist/version.txt
       - store_artifacts:
           path: ./dist
       - persist_to_workspace:
