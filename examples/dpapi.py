@@ -47,7 +47,7 @@ from impacket.smbconnection import SMBConnection
 from impacket.dcerpc.v5 import transport
 from impacket.dcerpc.v5 import lsad
 from impacket.dcerpc.v5 import bkrp
-from impacket.dcerpc.v5.rpcrt import RPC_C_AUTHN_LEVEL_PKT_PRIVACY
+from impacket.dcerpc.v5.rpcrt import RPC_C_AUTHN_LEVEL_PKT_PRIVACY, RPC_C_AUTHN_GSS_NEGOTIATE
 from impacket import version
 from impacket.examples import logger
 from impacket.examples.secretsdump import LocalOperations, LSASecrets
@@ -59,7 +59,7 @@ from impacket.dpapi import MasterKeyFile, MasterKey, CredHist, DomainKey, Creden
 class DPAPI:
     def __init__(self, options):
         self.options = options
-        self.dpapiSystem = None
+        self.dpapiSystem = {}
         pass
 
     def getDPAPI_SYSTEM(self,secretType, secret):
@@ -67,7 +67,6 @@ class DPAPI:
             machineKey, userKey = secret.split('\n')
             machineKey = machineKey.split(':')[1]
             userKey = userKey.split(':')[1]
-            self.dpapiSystem = {}
             self.dpapiSystem['MachineKey'] = unhexlify(machineKey[2:])
             self.dpapiSystem['UserKey'] = unhexlify(userKey[2:])
 
@@ -78,6 +77,13 @@ class DPAPI:
         lsaSecrets = LSASecrets(self.options.security, bootKey, None, isRemote=False, history=False, perSecretCallback = self.getDPAPI_SYSTEM)
 
         lsaSecrets.dumpSecrets()
+
+        # Did we get the values we wanted?
+        if 'MachineKey' not in self.dpapiSystem or 'UserKey' not in self.dpapiSystem:
+            logging.error('Cannot grab MachineKey/UserKey from LSA, aborting...')
+            sys.exit(1)
+
+
 
     def deriveKeysFromUser(self, sid, password):
         # Will generate two keys, one with SHA1 and another with MD4
@@ -277,6 +283,7 @@ class DPAPI:
                     lmhash, nthash = self.options.hashes.split(':')
                 else:
                     lmhash, nthash = '',''
+
                 rpctransport = transport.DCERPCTransportFactory(r'ncacn_np:%s[\PIPE\protected_storage]' % remoteName)
 
                 if hasattr(rpctransport, 'set_credentials'):
@@ -287,6 +294,8 @@ class DPAPI:
                 
                 dce = rpctransport.get_dce_rpc()
                 dce.set_auth_level(RPC_C_AUTHN_LEVEL_PKT_PRIVACY)
+                if self.options.k is True:
+                    dce.set_auth_type(RPC_C_AUTHN_GSS_NEGOTIATE)
                 dce.connect()
                 dce.bind(bkrp.MSRPC_UUID_BKRP, transfer_syntax = ('8a885d04-1ceb-11c9-9fe8-08002b104860', '2.0'))
                 
@@ -328,7 +337,7 @@ class DPAPI:
         elif self.options.action.upper() == 'BACKUPKEYS':
             domain, username, password, address = re.compile('(?:(?:([^/@:]*)/)?([^@:]*)(?::([^@]*))?@)?(.*)').match(
                 self.options.target).groups('')
-            if password == '' and username != '' and options.hashes is None:
+            if password == '' and username != '' and self.options.hashes is None and self.options.no_pass is False and self.options.aesKey is None:
                 from getpass import getpass
                 password = getpass ("Password:")
             if self.options.hashes is not None:
@@ -337,13 +346,15 @@ class DPAPI:
                 lmhash, nthash = '',''
             connection = SMBConnection(address, address)
             if self.options.k:
-                connection.kerberosLogin(username, password, domain)
+                connection.kerberosLogin(username, password, domain, lmhash, nthash, self.options.aesKey)
             else:
                 connection.login(username, password, domain, lmhash=lmhash, nthash=nthash)
 
             rpctransport = transport.DCERPCTransportFactory(r'ncacn_np:445[\pipe\lsarpc]')
             rpctransport.set_smb_connection(connection)
             dce = rpctransport.get_dce_rpc()
+            if self.options.k:
+                dce.set_auth_type(RPC_C_AUTHN_GSS_NEGOTIATE)
             try:
                 dce.connect()
                 dce.bind(lsad.MSRPC_UUID_LSAD)
@@ -481,8 +492,15 @@ if __name__ == '__main__':
     # A domain backup key command
     backupkeys = subparsers.add_parser('backupkeys', help='domain backup key related functions')
     backupkeys.add_argument('-t', '--target', action='store', required=True, help='[[domain/]username[:password]@]<targetName or address>')
-    backupkeys.add_argument('-k', action='store_true', required=False, help='use kerberos')
     backupkeys.add_argument('-hashes', action="store", metavar = "LMHASH:NTHASH", help='NTLM hashes, format is LMHASH:NTHASH')
+    backupkeys.add_argument('-no-pass', action="store_true", help='don\'t ask for password (useful for -k)')
+    backupkeys.add_argument('-k', action="store_true", required=False, help='Use Kerberos authentication. Grabs credentials from ccache file '
+                       '(KRB5CCNAME) based on target parameters. If valid credentials cannot be found, it will use the '
+                       'ones specified in the command line')
+    backupkeys.add_argument('-aesKey', action="store", metavar = "hex key", help='AES key to use for Kerberos Authentication '
+                                                                            '(128 or 256 bits)')
+    backupkeys.add_argument('-dc-ip', action='store',metavar = "ip address", help='IP Address of the domain controller. '
+                       'If omitted it will use the domain part (FQDN) specified in the target parameter')
     backupkeys.add_argument('--export', action='store_true', required=False, help='export keys to file')
 
     # A masterkey command
