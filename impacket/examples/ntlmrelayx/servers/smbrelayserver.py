@@ -372,7 +372,10 @@ class SMBRelayServer(Thread):
         try:
             if self.config.mode.upper () == 'REFLECTION':
                 self.targetprocessor = TargetsProcessor (singleTarget='SMB://%s:445/' % connData['ClientIP'])
-
+            if self.authUser == '/':
+                LOG.info('SMBD-%s: Connection from %s authenticated as guest (anonymous). Skipping target selection.' %
+                         (connId, connData['ClientIP']))
+                return self.origsmb2TreeConnect (connId, smbServer, recvPacket)
             self.target = self.targetprocessor.getTarget(identity = self.authUser)
             if self.target is None:
                 # No more targets to process, just let the victim to fail later
@@ -593,6 +596,10 @@ class SMBRelayServer(Thread):
                 # accept-completed
                 respToken['NegResult'] = b'\x00'
 
+                # Done with the relay for now.
+                connData['Authenticated'] = True
+                del(connData['relayToHost'])
+
                 # Status SUCCESS
                 errorCode = STATUS_SUCCESS
                 # Let's store it in the connection data
@@ -656,6 +663,9 @@ class SMBRelayServer(Thread):
                     writeJohnOutputToFile(ntlm_hash_data['hash_string'], ntlm_hash_data['hash_version'],
                                           self.server.getJTRdumpPath())
 
+                # Done with the relay for now.
+                connData['Authenticated'] = True
+                del(connData['relayToHost'])
                 self.do_attack(client)
                 # Now continue with the server
             #############################################################
@@ -665,9 +675,6 @@ class SMBRelayServer(Thread):
         respSMBCommand['Parameters'] = respParameters
         respSMBCommand['Data']       = respData
 
-        # From now on, the client can ask for other commands
-        connData['Authenticated'] = True
-        del(connData['relayToHost'])
 
         smbServer.setConnectionData(connId, connData)
 
@@ -689,13 +696,16 @@ class SMBRelayServer(Thread):
         try:
             if self.config.mode.upper () == 'REFLECTION':
                 self.targetprocessor = TargetsProcessor (singleTarget='SMB://%s:445/' % connData['ClientIP'])
-
+            if self.authUser == '/':
+                LOG.info('SMBD-%s: Connection from %s authenticated as guest (anonymous). Skipping target selection.' %
+                         (connId, connData['ClientIP']))
+                return self.origsmbComTreeConnectAndX (connId, smbServer, recvPacket)
             self.target = self.targetprocessor.getTarget(identity = self.authUser)
             if self.target is None:
                 # No more targets to process, just let the victim to fail later
                 LOG.info('SMBD-%s: Connection from %s@%s controlled, but there are no more targets left!' %
                          (connId, self.authUser, connData['ClientIP']))
-                return self.origsmb2TreeConnect (connId, smbServer, recvPacket)
+                return self.origsmbComTreeConnectAndX (connId, smbServer, recvPacket)
 
             LOG.info('SMBD-%s: Connection from %s@%s controlled, attacking target %s://%s' % ( connId, self.authUser,
                                                         connData['ClientIP'], self.target.scheme, self.target.netloc))
