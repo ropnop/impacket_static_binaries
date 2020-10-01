@@ -19,12 +19,19 @@ pip install pyinstaller==3.4
 pip install .
 
 # Hardcode UTF-8 in shells
-sed -r -i.bak 's/sys\.std(in|out)\.encoding/"UTF-8"/g' examples/*exec.py  
+sed -r -i.bak 's/sys\.std(in|out)\.encoding/"UTF-8"/g' examples/*exec.py
+
+# Create hook directory
+mkdir /tmp/custom-hooks
+
+# Create hook file
+echo "from PyInstaller.utils.hooks import copy_metadata" >> /tmp/custom-hooks/hook-impacket.py
+echo "datas = copy_metadata('impacket')" >> /tmp/custom-hooks/hook-impacket.py
 
 # Create standalone executables
 for i in examples/*.py
-do 
-    pyinstaller --specpath /tmp/spec --workpath /tmp/build --distpath /tmp/out --clean -F $i
+do
+    pyinstaller --specpath /tmp/spec --workpath /tmp/build --distpath /tmp/out --clean --additional-hooks-dir /tmp/custom-hooks -F $i
 done
 
 # Rename binaries
