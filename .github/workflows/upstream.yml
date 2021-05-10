@@ -1,8 +1,8 @@
 name: Sync with Upstream
 
 on:
-  schedule:
-    - cron: "0 0 * * *" #every 24 hours
+#   schedule:
+#     - cron: "0 0 * * *" #every 24 hours
   repository_dispatch:   
 
 jobs:
