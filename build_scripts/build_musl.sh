@@ -16,22 +16,23 @@ pip install setuptools==40.6.3
 pip install pyinstaller==3.4
 
 # Install impacket
+cd /impacket/impacket
 pip install .
 
 # Hardcode UTF-8 in shells
 sed -r -i.bak 's/sys\.std(in|out)\.encoding/"UTF-8"/g' examples/*exec.py  
 
 # Create standalone executables
-for i in examples/*.py
+for i in /impacket/impacket/examples/*.py
 do 
     pyinstaller --specpath /tmp/spec --workpath /tmp/build --distpath /tmp/out --clean -F $i
 done
 
 # Rename binaries
-mkdir -p dist
+mkdir -p /impacket/dist
 ARCH=$(uname -m)
 find /tmp/out/ -type f -exec mv {} {}_musl_$ARCH \;
-mv /tmp/out/* ./dist/
+mv /tmp/out/* /impacket/dist/
 
 # Restore backup file
 for fn in examples/*.bak; do mv -f "${fn}" "${fn%%.bak}"; done
