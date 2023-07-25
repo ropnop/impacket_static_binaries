@@ -11,6 +11,9 @@ set -euo pipefail
 ROOT=$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )
 cd "${ROOT}"
 
+# Update pip (so that compiled packages are used if rust is required)
+python -m pip install --upgrade pip
+
 # Install impacket
 pip install .
 

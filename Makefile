@@ -24,7 +24,7 @@ windows: ## Build Windows_x64 binaries
 		-v "${PWD}:/impacket" \
 		-w "/impacket" \
 		--entrypoint="/impacket/build_scripts/build_windows.sh" \
-		cdrx/pyinstaller-windows:python2
+		cdrx/pyinstaller-windows:python3
 
 clean: cleanspec ## Remove all build artifacts
 	rm -rf dist/* build/*
