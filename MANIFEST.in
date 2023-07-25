@@ -1,7 +1,0 @@
-include MANIFEST.in
-include LICENSE
-include ChangeLog
-include requirements.txt
-include tox.ini
-recursive-include examples tests *.txt *.py
-recursive-include tests *
